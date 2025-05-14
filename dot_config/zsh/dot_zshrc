@@ -1,0 +1,92 @@
+# Early exit on non-interactive shell
+[[ $- != *i* ]] && return
+
+# Add antidote to fpath BEFORE compinit
+source "${HOME}/.antidote/antidote.zsh"
+
+# Load completions and prompt
+autoload -Uz compinit promptinit
+compinit
+promptinit; prompt gentoo
+
+# Cache completions
+zstyle ':completion::complete:*' use-cache 1
+
+# Source config stuff
+[[ -f ${ZDOTDIR}/.zsh_aliases ]] && source "${ZDOTDIR}/.zsh_aliases"
+[[ -f ${ZDOTDIR}/.zsh_functions ]] && source "${ZDOTDIR}/.zsh_functions"
+[[ -f ${ZDOTDIR}/.shell_vars ]] && source "${ZDOTDIR}/.shell_vars" # Load shell agnostic environment variables
+
+# fzf keybindings
+[[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
+
+# Set options
+setopt autocd correct interactivecomments 
+setopt no_beep complete_in_word always_to_end extended_glob 
+setopt append_history inc_append_history share_history hist_ignore_dups
+setopt hist_ignore_space hist_reduce_blanks hist_verify 
+
+# History stuff
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+
+# Lazy load antidote plugins so the static list is only updated
+# when the plugin list changes.
+
+# Set the plugin files root name
+zsh_plugins="${ZDOTDIR}/.zsh_plugins"
+
+# Make sure the plugin list exists
+zsh_plugins_list="${zsh_plugins}.txt"
+[[ -f ${zsh_plugins_list} ]] || touch "${zsh_plugins_list}"
+
+# Generate the static plugin file if need be
+if [[ ! ${zsh_plugins}.zsh -nt ${zsh_plugins_list} ]]; then
+	antidote bundle < "${zsh_plugins_list}" > "${zsh_plugins}.zsh"
+fi
+
+# Source the static plugin file
+source "${zsh_plugins}.zsh" # PLUGINS GO BRRRR
+
+# Don't start Starship in a TTY (eugh icons no load = ugly!)
+if [[ -t 1 && ${TERM} != "linux" ]]; then
+	eval "$(starship init zsh)"
+fi
+
+# disable sort when completing git checkout
+zstyle ':completion:*:git-checkout:*' sort false
+# set descriptions format to enable group support
+# NOTE: don't use escape sequences (like '%F{red}%d%f') here, fzf-tab will ignore them
+zstyle ':completion:*:descriptions' format '[%d]'
+# set list-colors to enable filename colorizing
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+zstyle ':completion:*' menu no
+
+# fzf-tab configuration stuff
+# NOTE: fzf-tab does not follow FZF_DEFAULT_OPTS by default
+zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept
+# To make fzf-tab follow FZF_DEFAULT_OPTS.
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+# switch group using < and >
+zstyle ':fzf-tab:*' switch-group '<' '>'
+
+# TMUX-specific settings
+if [[ -n ${TMUX} ]]; then
+    # Use the 'ftb-tmux-pop' to make use of tmux's "popup" feature
+    zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+fi
+
+# use Bat with the batman wrapper for pretty man pages
+if command -v batman >/dev/null 2>&1; then
+	eval "$(command batman --export-env)"
+fi
+
+# Added by ssh-agent setup
+export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
+
+# Setup zoxide
+if command -v zoxide >/dev/null 2>&1; then
+	eval "$(zoxide init zsh)"
+fi

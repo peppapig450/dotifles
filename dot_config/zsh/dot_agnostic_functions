@@ -1,0 +1,105 @@
+# Mostly POSIX-compatible functions that don’t rely on shell magic.
+# Should work in Bash, Zsh, and other grown-up shells. No guarantees if you're using dash/ash on a potato.
+
+# reset_cursor - Fixes your terminal cursor after nvim eats it alive.
+# Uses TERM heuristics to guess which flavor of dumb terminal you're in and tries to recover.
+# And YES! it works in TMUX :gasp:
+reset_cursor() {
+	case "${TERM}" in
+		linux)
+			# Linux virtual console
+			tput cnorm 2>/dev/null || printf '\033[0 q'
+			;;
+		tmux*)
+			# Wrap for tmux pass-through
+			printf "\ePtmux;\e\e[0 q\e\\"
+			;;
+		screen*|rxvt*|xterm*)
+			# xterm-style emulators & screen
+			printf '\033[0 q'
+			;;
+		*)
+			# Fallback to terminfo or printf if tput fails
+			tput cnorm 2>/dev/null || printf '\033[0 q'
+			;;
+	esac
+}
+
+# Wrapper for nvim that resets cursor after exit
+# TODO: this should be a small wrapper on $PATH
+nvim() {
+	trap 'reset_cursor' EXIT
+	command nvim "$@"
+}
+
+# accept_keyword - Accept a package keyword (e.g., ~amd64) in Gentoo
+# This uses bash arrays to validate against valid keywords and ~ thingies
+accept_keyword() {
+	if [ $# -ne 2 ]; then
+		printf 'Usage: accept_keyword <category>/<package> keyword\n' >&2
+		return 1
+	fi
+
+	pkg="${1}"
+	keyword="${2}"
+	atom="${pkg} ${keyword}"
+	dir="/etc/portage/package.accept_keywords"
+	filename="${dir}/$(basename "${pkg}")"
+
+	# Early exit on duplicate entry
+	if grep -qF -- "${atom}" "${dir}"/* 2>/dev/null; then
+		printf 'Already accepted: %s\n' "${atom}"
+		return 0
+	fi
+
+	# Build valid keyword list dynamically
+	if [[ -n ${BASH_VERSION} ]]; then
+		mapfile -t arch_list < <(grep -E '^[^#-][^-]*$' -- /var/db/repos/gentoo/profiles/arch.list)
+	else
+		arch_list=()
+		while IFS= read -r line; do
+			arch_list+=("${line}")
+		done < <(grep -E '^[^#-][^-]*$' -- /var/db/repos/gentoo/profiles/arch.list)
+	fi
+
+	valid_keywords=()
+	for arch in "${arch_list[@]}"; do
+		valid_keywords+=("${arch}" "~${arch}")
+	done
+	valid_keywords+=("**" "*" "~*")	
+
+	# Validate keyword
+	local valid=false
+	for kw in "${valid_keywords[@]}"; do
+		if [ "${kw}" = "${keyword}" ]; then
+			valid=true
+			break
+		fi
+	done
+
+	if [ "${valid}" = false ]; then
+		printf 'Invalid keyword: %s\n' "${keyword}" >&2
+		return 1
+	fi
+
+	# Append safely
+	# TODO: auto-detect sudo or doas and use appropiately
+	printf '%s\n' "${atom}" | doas tee -a -- "${filename}"
+}
+
+# Small wrapper around batman for themed colored man pages
+if command -v batman >/dev/null 2>&1; then
+	batman() {
+		env BAT_THEME="Monokai Extended" BAT_PAGING=always command batman "$@"
+	}
+fi
+
+# Interactive jump using zoxide and fzf
+zj() {
+	local dir
+
+	dir="$(zoxide query -ls | fzf --height 40% --layout=reverse --border --prompt="zoxide > " | awk '{ print $2 }')"
+	if [[ -n ${dir} ]]; then
+		z "${dir}"
+	fi
+}

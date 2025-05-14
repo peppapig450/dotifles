@@ -1,0 +1,8 @@
+# Suggestions as you type
+zsh-users/zsh-autosuggestions
+
+# Syntax highlighting
+zdharma-continuum/fast-syntax-highlighting
+
+# Fuzzy Tab completion
+Aloxaf/fzf-tab

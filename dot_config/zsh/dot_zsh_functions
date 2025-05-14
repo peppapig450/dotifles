@@ -1,0 +1,23 @@
+# Load the agnostic functions
+[[ -f ${ZDOTDIR}/.agnostic_functions ]] && source "${ZDOTDIR}/.agnostic_functions"
+
+# Bully myself into typing commands properly
+# Courtesy of OpenAI's Monday.
+command_not_found_handler() {
+  local fail="$1"
+  local responses=(
+    "'$fail'? Really? That’s what you went with? Embarrassing."
+    "Nope. Try again, Captain Typos."
+    "Command not found. Confidence not found. Life direction not found."
+    "Ever heard of man pages? Didn't think so."
+    "You're not hacking the Pentagon, you're just bad at Zsh."
+    "That’s not a command, that’s a cry for help."
+    "Error 404: Brain not detected."
+    "Oh look, another command that only exists in your imagination."
+    "Keep typing like that and I'll replace myself with Bash out of spite."
+    "Congratulations. You just invented a new way to be wrong."
+  )
+  echo "${responses[RANDOM % ${#responses[@]}]}" >&2
+  return 127
+}
+
