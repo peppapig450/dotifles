@@ -25,13 +25,6 @@ reset_cursor() {
 	esac
 }
 
-# Wrapper for nvim that resets cursor after exit
-# TODO: this should be a small wrapper on $PATH
-nvim() {
-	trap 'reset_cursor' EXIT
-	command nvim "$@"
-}
-
 # accept_keyword - Accept a package keyword (e.g., ~amd64) in Gentoo
 # This uses bash arrays to validate against valid keywords and ~ thingies
 accept_keyword() {
