@@ -21,3 +21,16 @@ export _ZO_FZF_OPTS="--height 40% --layout=reverse --info=inline"
 
 # Setup gpg agent
 export GPG_TTY="$(tty)"
+
+# Use my neovim wrapper from https://github.com/peppapig450/scripts
+# if available, otherwise use boring old vim
+EDITOR="$(
+	if [[ -x ${HOME}/.local/bin/nvim ]]; then
+		echo "${HOME}/.local/bin/nvim"
+	else
+		echo "nvim"
+	fi
+)"
+export EDITOR
+export VISUAL="${EDITOR}"
+
