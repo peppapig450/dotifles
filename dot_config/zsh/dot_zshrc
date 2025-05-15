@@ -1,6 +1,16 @@
 # Early exit on non-interactive shell
 [[ $- != *i* ]] && return
 
+# Force Emacs-style keybinds so Control-A & E work
+bindkey -e
+
+# Redirect compdump to XDG cache dir, like a civilized person
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export ZSH_COMPDUMP="${XDG_CACHE_HOME}/zsh/.zcompdump-${HOST}-${ZSH_VERSION}"
+
+# Make sure the directory exists
+mkdir -p "$(dirname "$ZSH_COMPDUMP")"
+
 # Add antidote to fpath BEFORE compinit
 source "${HOME}/.antidote/antidote.zsh"
 
