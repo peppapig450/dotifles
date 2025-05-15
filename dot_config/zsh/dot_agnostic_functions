@@ -82,8 +82,8 @@ accept_keyword() {
 
 # Small wrapper around batman for themed colored man pages
 if command -v batman >/dev/null 2>&1; then
-	batman() {
-		env BAT_THEME="Monokai Extended" BAT_PAGING=always command batman "$@"
+	man() {
+		env BAT_THEME="Monokai Extended" BAT_PAGING=always "$(command -pv man)" "$@"
 	}
 fi
 
