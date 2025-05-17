@@ -1,0 +1,26 @@
+theme = "catppuccin_macchiato"
+
+[editor]
+line-number = "relative"
+mouse = true
+bufferline = "always"
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name"]
+center = ["diagnostics"]
+right = ["file-type", "position", "file-encoding"]
+
+[keys.normal]
+"space" = { "w" = ":w", "q" = ":q" }  # Save and quit like a civilized being
+"C-s" = ":w"
+"C-a" = "goto_line_start"
+"C-e" = "goto_line_end"
+
+[keys.insert]
+"C-a" = "goto_line_start"
+"C-e" = "goto_line_end"
