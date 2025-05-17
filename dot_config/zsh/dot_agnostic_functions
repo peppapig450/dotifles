@@ -134,3 +134,18 @@ if command -v direnv >/dev/null 2>&1; then
 		fi
 	}
 fi			
+
+# Chezmoi functions
+czg() {
+	chezmoi git -- "$@"
+}
+
+# TODO: figure out how to get previewing to work with chezmoi cat and bat
+# and this working in general...
+czf() {
+	local file
+	file="$(chezmoi managed --exclude=private --exclude=encrypted \
+		| fzf --prompt="Edit dotfile: ")" || return
+	[[ -z ${file} ]] && return
+	chezmoi edit --apply -- "${file}"
+}

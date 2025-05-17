@@ -31,8 +31,20 @@ alias cat='bat'
 alias fzfcat='fzf --preview "bat --style=numbers --color=always --line-range :500 {}"'
 
 # Reset cursor (curse you nvim)
-alias rc-cursor='reset_cursor' # Call the function from ~/.agnostic_functions
+alias rc-cursor='reset_cursor' # Call the function from ~/.config/zsh/agnostic_functions
 
 # More convenient alias for zoxide
 alias j='z'
 alias ji='zj'
+
+# Convience aliases for chezmoi
+alias cz='chezmoi'
+alias czcd='chezmoi cd'
+alias czd='chezmoi diff'
+alias cza='chezmoi apply'
+alias cze='chezmoi edit'
+alias czea='chezmoi edit --apply'
+alias czaa='chezmoi add'
+alias czr='chezmoi re-add'
+alias czup='chezmoi upgrade'
+alias czdoc='chezmoi doctor'
