@@ -96,3 +96,41 @@ zj() {
 		z "${dir}"
 	fi
 }
+
+# direnv functions
+if command -v direnv >/dev/null 2>&1; then
+	# Manually load .envrc for the current directory using direnv
+	direnv_on() {
+		local shell_name
+
+		if [[ -f .envrc ]]; then
+			shell_name="$(basename "${SHELL}")"
+			case "${shell_name}" in
+				bash|zsh)
+					eval "$(direnv export "${shell_name}")"
+					printf "direnv environment loaded for %s\n" "$(pwd)"
+					;;
+				*)
+					printf "Unsupported shell: %s. Don't load this file." "${shell_name}"
+					return 1
+					;;
+			esac
+		else
+			printf "No .envrc found in current directory."
+			return 1
+		fi
+	}
+
+	# Manually unload direnv by simulating a directory change to reset environment
+	direnv_off() {
+		local old_dir
+		if [[ -f .envrc ]]; then
+			old_dir="$(pwd)"
+			cd "${HOME}" || return
+			cd "${old_dir}" || return
+			printf "direnv environment unloaded (reloaded directory to reset variables)"
+		else
+			printf "No .envrc found in current directory."
+		fi
+	}
+fi			
