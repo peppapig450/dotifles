@@ -111,12 +111,12 @@ if command -v direnv >/dev/null 2>&1; then
 					printf "direnv environment loaded for %s\n" "$(pwd)"
 					;;
 				*)
-					printf "Unsupported shell: %s. Don't load this file." "${shell_name}"
+					printf "Unsupported shell: %s. Don't load this file.\n" "${shell_name}"
 					return 1
 					;;
 			esac
 		else
-			printf "No .envrc found in current directory."
+			printf "No .envrc found in current directory.\n"
 			return 1
 		fi
 	}
@@ -128,9 +128,9 @@ if command -v direnv >/dev/null 2>&1; then
 			old_dir="$(pwd)"
 			cd "${HOME}" || return
 			cd "${old_dir}" || return
-			printf "direnv environment unloaded (reloaded directory to reset variables)"
+			printf "direnv environment unloaded (reloaded directory to reset variables).\n"
 		else
-			printf "No .envrc found in current directory."
+			printf "No .envrc found in current directory.\n"
 		fi
 	}
 fi			
