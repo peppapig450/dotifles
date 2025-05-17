@@ -1,3 +1,3 @@
 [[language]]
 name = "bash"
-file-types = [ "zsh", { glob = "dot_agnostic_functions" }, { glob = "dot_zsh_*" }, { glob = "dot_shell_vars" } ]
+file-types = [ "sh", { glob = "dot_agnostic_functions" }, { glob = "dot_zsh_*" }, { glob = "dot_shell_vars" }, { glob = "*.zsh" } ]
