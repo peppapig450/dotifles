@@ -6,7 +6,7 @@ bindkey -e
 
 # Redirect compdump to XDG cache dir, like a civilized person
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-export ZSH_COMPDUMP="${XDG_CACHE_HOME}/zsh/.zcompdump-${HOST}-${ZSH_VERSION}"
+ZSH_COMPDUMP="${XDG_CACHE_HOME}/zsh/.zcompdump-${HOST}-${ZSH_VERSION}"
 
 # Make sure the directory exists
 mkdir -p "$(dirname "$ZSH_COMPDUMP")"
@@ -16,7 +16,7 @@ source "${HOME}/.antidote/antidote.zsh"
 
 # Load completions and prompt
 autoload -Uz compinit promptinit
-compinit
+compinit -d "${ZSH_COMPDUMP}"
 promptinit; prompt gentoo
 
 # Cache completions
