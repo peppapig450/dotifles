@@ -100,6 +100,3 @@ export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
 if command -v zoxide >/dev/null 2>&1; then
 	eval "$(zoxide init zsh)"
 fi
-
-# Source command-not-found
-[[ -f /etc/bash/bashrc.d/command-not-found.sh ]] && source /etc/bash/bashrc.d/command-not-found.sh
