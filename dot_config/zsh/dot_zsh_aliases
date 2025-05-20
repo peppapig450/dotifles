@@ -14,7 +14,7 @@ alias ll='ls -lah'
 alias lt='eza --tree'
 
 # To call LSD
-alias lsd='lsd --group-dirs-first'
+alias lsd='lsd --group-dirs first'
 alias lst='lsd --tree'
 
 # Optionally override lsd look:
