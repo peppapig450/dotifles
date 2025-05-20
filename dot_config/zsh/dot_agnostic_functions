@@ -148,6 +148,34 @@ if command -v direnv >/dev/null 2>&1; then
     }
 fi
 
+# copy_as_user - Copy contents from a source directory to a destination directory,
+# removing root ownership and permissions, and applying sane defaults (644 for files, 755 for directories).
+# Usage: copy_as_user <SOURCE_DIR> <DEST_DIR>
+copy_as_user() {
+  if (( $# < 2 )); then
+    printf "Usage: copy_as_user <SOURCE> <DEST>\n"
+    return 1
+  fi
+
+  local src="${1}"
+  local dest="${2}"
+
+  # Check if source exists and is a directory
+  if [[ ! -d ${src} ]]; then
+    printf "Error: %s is not a valid source directory.\n" "${src}"
+    return 1
+  fi
+
+  # Check if destination exists and is a directory
+  if [[ ! -d ${dest} ]]; then
+    printf "Error: %s is not a valid destination directory.\n" "${dest}"
+    return 1
+  fi
+
+  rsync -av --no-owner --no-group --no-perms --chmod=F644,D755 "${src}/" "${dest}/"
+}
+
+
 # Chezmoi functions
 czg() {
     chezmoi git -- "$@"
@@ -162,3 +190,4 @@ czf() {
     [[ -z ${file} ]] && return
     chezmoi edit --apply -- "${file}"
 }
+
