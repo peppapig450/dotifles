@@ -5,154 +5,154 @@
 # Uses TERM heuristics to guess which flavor of dumb terminal you're in and tries to recover.
 # And YES! it works in TMUX :gasp:
 reset_cursor() {
-    case "${TERM}" in
-        linux)
-            # Linux virtual console
-            tput cnorm 2>/dev/null || printf '\033[0 q'
-            ;;
-        tmux*)
-            # Wrap for tmux pass-through
-            printf "\ePtmux;\e\e[0 q\e\\"
-            ;;
-        screen* | rxvt* | xterm*)
-            # xterm-style emulators & screen
-            printf '\033[0 q'
-            ;;
-        *)
-            # Fallback to terminfo or printf if tput fails
-            tput cnorm 2>/dev/null || printf '\033[0 q'
-            ;;
-    esac
+  case "${TERM}" in
+    linux)
+      # Linux virtual console
+      tput cnorm 2>/dev/null || printf '\033[0 q'
+      ;;
+    tmux*)
+      # Wrap for tmux pass-through
+      printf "\ePtmux;\e\e[0 q\e\\"
+      ;;
+    screen* | rxvt* | xterm*)
+      # xterm-style emulators & screen
+      printf '\033[0 q'
+      ;;
+    *)
+      # Fallback to terminfo or printf if tput fails
+      tput cnorm 2>/dev/null || printf '\033[0 q'
+      ;;
+  esac
 }
 
 # accept_keyword - Accept a package keyword (e.g., ~amd64) in Gentoo
 # This uses bash arrays to validate against valid keywords and ~ thingies
 accept_keyword() {
-    if [ $# -ne 2 ]; then
-        printf 'Usage: accept_keyword <category>/<package> keyword\n' >&2
-        return 1
+  if [ $# -ne 2 ]; then
+    printf 'Usage: accept_keyword <category>/<package> keyword\n' >&2
+    return 1
+  fi
+
+  pkg="${1}"
+  keyword="${2}"
+  atom="${pkg} ${keyword}"
+  dir="/etc/portage/package.accept_keywords"
+  filename="${dir}/$(basename "${pkg}")"
+
+  # Early exit on duplicate entry
+  if grep -qF -- "${atom}" "${dir}"/* 2>/dev/null; then
+    printf 'Already accepted: %s\n' "${atom}"
+    return 0
+  fi
+
+  # Build valid keyword list dynamically
+  if [[ -n ${BASH_VERSION} ]]; then
+    mapfile -t arch_list < <(grep -E '^[^#-][^-]*$' -- /var/db/repos/gentoo/profiles/arch.list)
+  else
+    arch_list=()
+    while IFS= read -r line; do
+      arch_list+=("${line}")
+    done < <(grep -E '^[^#-][^-]*$' -- /var/db/repos/gentoo/profiles/arch.list)
+  fi
+
+  valid_keywords=()
+  for arch in "${arch_list[@]}"; do
+    valid_keywords+=("${arch}" "~${arch}")
+  done
+  valid_keywords+=("**" "*" "~*")
+
+  # Validate keyword
+  local valid=false
+  for kw in "${valid_keywords[@]}"; do
+    if [ "${kw}" = "${keyword}" ]; then
+      valid=true
+      break
     fi
+  done
 
-    pkg="${1}"
-    keyword="${2}"
-    atom="${pkg} ${keyword}"
-    dir="/etc/portage/package.accept_keywords"
-    filename="${dir}/$(basename "${pkg}")"
+  if [ "${valid}" = false ]; then
+    printf 'Invalid keyword: %s\n' "${keyword}" >&2
+    return 1
+  fi
 
-    # Early exit on duplicate entry
-    if grep -qF -- "${atom}" "${dir}"/* 2>/dev/null; then
-        printf 'Already accepted: %s\n' "${atom}"
-        return 0
-    fi
-
-    # Build valid keyword list dynamically
-    if [[ -n ${BASH_VERSION} ]]; then
-        mapfile -t arch_list < <(grep -E '^[^#-][^-]*$' -- /var/db/repos/gentoo/profiles/arch.list)
-    else
-        arch_list=()
-        while IFS= read -r line; do
-            arch_list+=("${line}")
-        done < <(grep -E '^[^#-][^-]*$' -- /var/db/repos/gentoo/profiles/arch.list)
-    fi
-
-    valid_keywords=()
-    for arch in "${arch_list[@]}"; do
-        valid_keywords+=("${arch}" "~${arch}")
-    done
-    valid_keywords+=("**" "*" "~*")
-
-    # Validate keyword
-    local valid=false
-    for kw in "${valid_keywords[@]}"; do
-        if [ "${kw}" = "${keyword}" ]; then
-            valid=true
-            break
-        fi
-    done
-
-    if [ "${valid}" = false ]; then
-        printf 'Invalid keyword: %s\n' "${keyword}" >&2
-        return 1
-    fi
-
-    # Append safely
-    # TODO: auto-detect sudo or doas and use appropiately
-    printf '%s\n' "${atom}" | doas tee -a -- "${filename}"
+  # Append safely
+  # TODO: auto-detect sudo or doas and use appropiately
+  printf '%s\n' "${atom}" | doas tee -a -- "${filename}"
 }
 
 # Small wrapper around batman for themed colored man pages
 if command -v batman >/dev/null 2>&1; then
-    man() {
-        env BAT_THEME="Monokai Extended" BAT_PAGING=always "$(command -pv man)" "$@"
-    }
+  man() {
+    env BAT_THEME="Monokai Extended" BAT_PAGING=always "$(command -pv man)" "$@"
+  }
 fi
 
 # Interactive jump using zoxide and fzf
 zj() {
-    local dir
+  local dir
 
-    dir="$(zoxide query -ls | fzf --height 40% --layout=reverse --border --prompt="zoxide > " | awk '{ print $2 }')"
-    if [[ -n ${dir} ]]; then
-        z "${dir}"
-    fi
+  dir="$(zoxide query -ls | fzf --height 40% --layout=reverse --border --prompt="zoxide > " | awk '{ print $2 }')"
+  if [[ -n ${dir} ]]; then
+    z "${dir}"
+  fi
 }
 
 # direnv functions
 if command -v direnv >/dev/null 2>&1; then
-    # Manually load .envrc for the current directory using direnv
-    direnv_on() {
-        local shell_name
+  # Manually load .envrc for the current directory using direnv
+  direnv_on() {
+    local shell_name
 
-        if [[ -f .envrc ]]; then
-            shell_name="$(basename "${SHELL}")"
-            case "${shell_name}" in
-                bash | zsh)
-                    eval "$(direnv export "${shell_name}")"
-                    printf "direnv environment loaded for %s\n" "$(pwd)"
-                    ;;
-                *)
-                    printf "Unsupported shell: %s. Don't load this file.\n" "${shell_name}"
-                    return 1
-                    ;;
-            esac
-        else
-            printf "No .envrc found in current directory.\n"
-            return 1
-        fi
-    }
+    if [[ -f .envrc ]]; then
+      shell_name="$(basename "${SHELL}")"
+      case "${shell_name}" in
+        bash | zsh)
+          eval "$(direnv export "${shell_name}")"
+          printf "direnv environment loaded for %s\n" "$(pwd)"
+          ;;
+        *)
+          printf "Unsupported shell: %s. Don't load this file.\n" "${shell_name}"
+          return 1
+          ;;
+      esac
+    else
+      printf "No .envrc found in current directory.\n"
+      return 1
+    fi
+  }
 
-    # direnv_off — reverses direnv-induced PATH pollution by scrubbing known additions
-    # This function removes specific directories (like ~/.cargo/bin) from the PATH
-    direnv_off() {
-        local -a paths_to_remove=(
-            "${HOME}/.cargo/bin"
-            # Add more paths here if needed
-            # TODO: consider detecting changes instead of hardcoding known paths
-        )
+  # direnv_off — reverses direnv-induced PATH pollution by scrubbing known additions
+  # This function removes specific directories (like ~/.cargo/bin) from the PATH
+  direnv_off() {
+    local -a paths_to_remove=(
+      "${HOME}/.cargo/bin"
+      # Add more paths here if needed
+      # TODO: consider detecting changes instead of hardcoding known paths
+    )
 
-        # Loop through each target path and remove it from $PATH
-        for p in "${paths_to_remove[@]}"; do
-            # Handle all possible positions in PATH: middle, beginning, end, or only
-            PATH="${PATH//:${p}/}" # Remove if it appears after a colon (middle or end)
-            PATH="${PATH//${p}:/}" # Remove if it appears before a colon (beginning)
-            PATH="${PATH//${p}/}"  # Remove if it's the only entry
-        done
+    # Loop through each target path and remove it from $PATH
+    for p in "${paths_to_remove[@]}"; do
+      # Handle all possible positions in PATH: middle, beginning, end, or only
+      PATH="${PATH//:${p}/}" # Remove if it appears after a colon (middle or end)
+      PATH="${PATH//${p}:/}" # Remove if it appears before a colon (beginning)
+      PATH="${PATH//${p}/}"  # Remove if it's the only entry
+    done
 
-        # Re-export our clean new PATH
-        export PATH
+    # Re-export our clean new PATH
+    export PATH
 
-        # Clear the shell's lookup table to remove previously cached executables
-        hash -r
+    # Clear the shell's lookup table to remove previously cached executables
+    hash -r
 
-        printf "direnv environment scrubbed. PATH has been restored to its natural glory.\n"
-    }
+    printf "direnv environment scrubbed. PATH has been restored to its natural glory.\n"
+  }
 fi
 
 # copy_as_user - Copy contents from a source directory to a destination directory,
 # removing root ownership and permissions, and applying sane defaults (644 for files, 755 for directories).
 # Usage: copy_as_user <SOURCE_DIR> <DEST_DIR>
 copy_as_user() {
-  if (( $# < 2 )); then
+  if (($# < 2)); then
     printf "Usage: copy_as_user <SOURCE> <DEST>\n"
     return 1
   fi
@@ -175,19 +175,48 @@ copy_as_user() {
   rsync -av --no-owner --no-group --no-perms --chmod=F644,D755 "${src}/" "${dest}/"
 }
 
+# extract_ebuild - Copy an ebuild and its files dir to the current overlay repo
+# Assumes current working directory is the overlay root.
+# Usage: extract_ebuild <category/package>
+extract_ebuild() {
+  if [[ $# -ne 1 ]]; then
+    printf "Usage: extract_ebuild <category/package>\n" >&2
+    return 1
+  fi
+
+  [[ -f "profiles/repo_name" || -f "metadata/layout.conf" ]] || {
+    printf "Warning: current directory doesn't look like a Portage repo.\n" >&2
+  }
+
+  local atom="${1}"
+  local pkg src dest
+
+  # Find ebuild path
+  pkg=$(equery w -- "${atom}" 2>/dev/null) || {
+    printf "Package %s not found.\n" "${atom}" >&2
+    return 1
+  }
+
+  src=$(dirname -- "${pkg}")
+  dest="./${atom}"
+
+  mkdir -p -- "${dest}" || return 1
+
+  printf "Extracting %s...\n" "${atom}"
+  copy_as_user "${src}" "${dest}"
+}
 
 # Chezmoi functions
 czg() {
-    chezmoi git -- "$@"
+  chezmoi git -- "$@"
 }
 
 # TODO: figure out how to get previewing to work with chezmoi cat and bat
 # and this working in general...
 czf() {
-    local file
-    file="$(chezmoi managed --exclude=private --exclude=encrypted |
-        fzf --prompt="Edit dotfile: ")" || return
-    [[ -z ${file} ]] && return
-    chezmoi edit --apply -- "${file}"
+  local file
+  file="$(chezmoi managed --exclude=private --exclude=encrypted \
+    | fzf --prompt="Edit dotfile: ")" || return
+  [[ -z ${file} ]] && return
+  chezmoi edit --apply -- "${file}"
 }
-
