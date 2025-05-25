@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# This script atomically copies .zshenv to the HOME dir so that zsh loads
+# it and reads the changed $ZDOTDIR
+set -Eeuo pipefail
+
+# Use adler32 for now, end goal is to figure out how to use blake2/xxhash
+# .zshenv adler32: {{ include "dot_config/zsh/dot_zshenv" | adler32sum }}
+
+SRC={{ joinPath .chezmoi.sourceDir "dot_config/zsh/dot_zshenv" | quote }}
+DEST="${HOME}/.zshenv"
+
+command -p install -m 600 -C -T "${SRC}" "${DEST}"

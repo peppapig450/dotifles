@@ -1,0 +1,6 @@
+# This file should be installed as $HOME/.zshenv (e.g. via chezmoi).
+
+# Set ZDOTDIR so zsh sources configs from our managed .config/zsh directory.
+# Falls back to $HOME/.config if XDG_CONFIG_HOME is not set.
+_FALLBACK="${HOME}/.config"
+export ZDOTDIR="${XDG_CONFIG_HOME:-${_FALLBACK}}/zsh" 
