@@ -220,3 +220,28 @@ czf() {
   [[ -z ${file} ]] && return
   chezmoi edit --apply -- "${file}"
 }
+
+# Functions to trace the execution of bash scripts
+trace() {
+  if (( $# == 0 )); then
+    printf "Usage: trace <script> [args...]\n" >&2
+    return 1
+  fi
+
+  env PS4='+(${LINENO}) ${FUNCNAME[0]:+${FUNCNAME[0]}(): }' bash -x -- "$@"
+}
+
+# TODO: a --tee mode here for printing to stdout and a file is a good idea
+trace_log() {
+  if (( $# == 0 )); then
+    printf "Usage: trace_log <script> [args...]\n" >&2
+    return 1
+  fi
+
+  local logfile="trace-$(basename "${1}")-$(date +%s).log"
+
+  env PS4='+(${LINENO}) ${FUNCNAME[0]:+${FUNCNAME[0]}(): }' \
+    BASH_XTRACEFD=9 bash -x -- "$@" 9> "${logfile}"
+
+  printf "Trace log saved to %s\n" "${logfile}" 
+}
