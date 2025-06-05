@@ -3,23 +3,32 @@ alias reload='exec zsh'
 # Load general always-on aliases
 source "${ZDOTDIR}"/aliases/navigation.zsh
 
-# Use eza as our default ls replacement
-alias ls='eza --group-directories-first --icons'
-alias l='ls -l'
-alias la='ls -a'
-alias ll='ls -lah'
-alias lt='eza --tree'
+# Setup lazy loading
+autoload -Uz add-zsh-hook
 
-# To call LSD
-alias lsd='lsd --group-dirs first'
-alias lst='lsd --tree'
+# Lazy load ls aliases
 
-# Optionally override lsd look:
-alias lsdls='lsd -la --header'
+# List all "entry point" commands that should trigger loading
+_ls_alias_triggers=(
+  ls la ll lla llh llha lt ltg lta ltag lr lra lone lonea
+  lgit lgittree ldirs lfiles lsize ltime ltype lname lext
+  lextend lctx linode lcolor lbig lbytes labs llinks lmount loctal
+  lno lano laccess lcreate lchange lall dls
+  ls-sort
+)
 
-# Quickly switch default between the two:
-alias use-lsd="unalias ls && alias ls='lsd --group-dirs=first --icon=auto'"
-alias use-eza="unalias ls && alias ls='eza --group-directories-first --icons'"
+_lazy_load_ls_aliases() {
+    local cmd="${1%%[[:space:]]*}"
+    for alias in "${_ls_alias_triggers[@]}"; do
+        [[ "$cmd" == "$alias" ]] && {
+            source "${ZDOTDIR}/aliases/ls-aliases.zsh"
+            add-zsh-hook -d preexec _lazy_load_ls_aliases
+            return
+        }
+    done
+}
+
+add-zsh-hook preexec _lazy_load_ls_aliases
 
 # Use bat in place of cat for pretty colors and more
 alias cat='bat'
