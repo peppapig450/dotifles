@@ -21,3 +21,7 @@ command_not_found_handler() {
   return 127
 }
 
+# Load the modularized functions
+for funcfile in ${${(%):-%x}:A:h}/functions/*.zsh(N); do
+  source "$funcfile"
+done
