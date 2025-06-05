@@ -22,11 +22,6 @@ promptinit; prompt gentoo
 # Cache completions
 zstyle ':completion::complete:*' use-cache 1
 
-# Source config stuff
-[[ -f ${ZDOTDIR}/.zsh_aliases ]] && source "${ZDOTDIR}/.zsh_aliases"
-[[ -f ${ZDOTDIR}/.zsh_functions ]] && source "${ZDOTDIR}/.zsh_functions"
-[[ -f ${ZDOTDIR}/.shell_vars ]] && source "${ZDOTDIR}/.shell_vars" # Load shell agnostic environment variables
-
 # fzf keybindings
 [[ -f /usr/share/fzf/key-bindings.zsh ]] && source /usr/share/fzf/key-bindings.zsh
 
@@ -59,10 +54,10 @@ fi
 # Source the static plugin file
 source "${zsh_plugins}.zsh" # PLUGINS GO BRRRR
 
-# Don't start Starship in a TTY (eugh icons no load = ugly!)
-if [[ -t 1 && ${TERM} != "linux" ]]; then
-	eval "$(starship init zsh)"
-fi
+# Source config stuff
+for file in .zsh_aliases .zsh_functions .shell_vars; do
+  [[ -f "${ZDOTDIR}/${file}" ]] && source "${ZDOTDIR}/${file}"
+done
 
 # disable sort when completing git checkout
 zstyle ':completion:*:git-checkout:*' sort false
@@ -96,4 +91,9 @@ fi
 # Setup zoxide
 if (( $+commands[zoxide] )); then
 	eval "$(zoxide init zsh)"
+fi
+
+# Don't start Starship in a TTY (eugh icons no load = ugly!)
+if [[ -t 1 && ${TERM} != "linux" ]]; then
+	eval "$(starship init zsh)"
 fi
