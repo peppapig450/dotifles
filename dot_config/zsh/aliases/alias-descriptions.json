@@ -57,5 +57,26 @@
     "catgit": "Show file using bat with changes (git) style.",
     "catd": "Show file using bat with default style.",
     "catfull": "Show file using bat with full style."
+  },
+  "chezmoi.zsh": {
+    "cz": "Run chezmoi (dotfiles manager) command.",
+    "czcd": "Open a shell in the source directory managed by chezmoi.",
+    "czd": "Show the diff between the source state and the destination state.",
+    "cza": "Apply changes from chezmoi source to destination (update dotfiles).",
+    "czea": "Edit a source file and immediately apply changes.",
+    "czaa": "Add a file or directory to chezmoi source state.",
+    "czr": "Re-add a file to chezmoi (updates source state from destination).",
+    "czup": "Update chezmoi source state from upstream (pull changes) and apply.",
+    "czupup": "Upgrade chezmoi to the latest version.",
+    "czgen": "Generates output for use with chezmoi.",
+    "czs": "Show the status of chezmoi-managed files.",
+    "czrm": "Forget (remove) a file or directory from chezmoi source state.",
+    "czdoc": "Run chezmoi diagnostics (doctor) to check for issues.",
+    "czi": "List files and directories ignored by chezmoi.",
+    "czh": "Show help for chezmoi.",
+    "czx": "Render and execute a chezmoi template.",
+    "czm": "List files and directories managed by chezmoi.",
+    "czt": "Show chezmoi-managed files and directories as a tree.",
+    "czg": "Pass git commands through to the chezmoi-managed repo."
   }
 }

@@ -43,6 +43,22 @@ _lazy_load_cat_aliases() {
     done    
 }
 
+_chezmoi_alias_triggers=(
+    'cz*' 'chezmoi'
+)
+
+_lazy_load_chezmoi_aliases() {
+    local cmd="${1%%[[:space:]]*}"
+    for alias in "${_chezmoi_alias_triggers[@]}"; do
+        [[ "$cmd" == "$alias" ]] && {
+            source "${ZDOTDIR}/aliases/chezmoi.zsh"
+            add-zsh-hook -d preexec _lazy_load_chezmoi_aliases
+            return
+        }
+    done
+}
+
+add-zsh-hook preexec _lazy_load_chezmoi_aliases
 add-zsh-hook preexec _lazy_load_cat_aliases
 add-zsh-hook preexec _lazy_load_ls_aliases
 
@@ -53,14 +69,3 @@ alias rc-cursor='reset_cursor' # Call the function from ~/.config/zsh/agnostic_f
 alias j='z'
 alias ji='zj'
 
-# Convience aliases for chezmoi
-alias cz='chezmoi'
-alias czcd='chezmoi cd'
-alias czd='chezmoi diff'
-alias cza='chezmoi apply'
-alias cze='chezmoi edit'
-alias czea='chezmoi edit --apply'
-alias czaa='chezmoi add'
-alias czr='chezmoi re-add'
-alias czup='chezmoi upgrade'
-alias czdoc='chezmoi doctor'
