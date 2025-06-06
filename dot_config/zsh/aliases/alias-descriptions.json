@@ -47,5 +47,15 @@
     "....": "Go up two directories (equivalent to cd ../../).",
     ".....": "Go up three directories (equivalent to cd ../../../).",
     "......": "Go up four directories (equivalent to cd ../../../../)."
+  },
+  "bat.zsh": {
+    "cat": "Use bat as a replacement for cat.",
+    "fzfcat": "Use fzf with bat preview (line numbers, color, first 500 lines).",
+    "catless": "Show file using bat with plain style and always paging.",
+    "cathead": "Show file using bat with header style.",
+    "catgrid": "Show file using bat with grid style.",
+    "catgit": "Show file using bat with changes (git) style.",
+    "catd": "Show file using bat with default style.",
+    "catfull": "Show file using bat with full style."
   }
 }

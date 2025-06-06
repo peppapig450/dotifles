@@ -28,13 +28,23 @@ _lazy_load_ls_aliases() {
     done
 }
 
+_cat_alias_triggers=(
+    cat fzfcat
+)
+
+_lazy_load_cat_aliases() {
+    local cmd="${1%%[[:space:]]*}"
+    for alias in "${_cat_alias_triggers[@]}"; do
+        [[ "$cmd" == "$alias" ]] && {
+            source "${ZDOTDIR}/aliases/bat.zsh"
+            add-zsh-hook -d preexec _lazy_load_cat_aliases
+            return
+        }
+    done    
+}
+
+add-zsh-hook preexec _lazy_load_cat_aliases
 add-zsh-hook preexec _lazy_load_ls_aliases
-
-# Use bat in place of cat for pretty colors and more
-alias cat='bat'
-
-# Use bat for previewing files when using fzf
-alias fzfcat='fzf --preview "bat --style=numbers --color=always --line-range :500 {}"'
 
 # Reset cursor (curse you nvim)
 alias rc-cursor='reset_cursor' # Call the function from ~/.config/zsh/agnostic_functions
