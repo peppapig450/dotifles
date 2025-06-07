@@ -78,5 +78,12 @@
     "czm": "List files and directories managed by chezmoi.",
     "czt": "Show chezmoi-managed files and directories as a tree.",
     "czg": "Pass git commands through to the chezmoi-managed repo."
+  },
+  "misc.zsh": {
+    "reload": "Reload the current zsh configuration file (.zshrc).",
+    "hreload": "Restart the shell by re-executing zsh.",
+    "rc-cursor": "Reset the terminal cursor to its default style.",
+    "j": "Jump to directories using zoxide.",
+    "ji": "Interactively jump to directories using zoxide and fzf."
   }
 }
