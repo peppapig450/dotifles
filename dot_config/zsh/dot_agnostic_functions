@@ -206,11 +206,6 @@ extract_ebuild() {
   copy_as_user "${src}" "${dest}"
 }
 
-# Chezmoi functions
-czg() {
-  chezmoi git -- "$@"
-}
-
 # TODO: figure out how to get previewing to work with chezmoi cat and bat
 # and this working in general...
 czf() {
