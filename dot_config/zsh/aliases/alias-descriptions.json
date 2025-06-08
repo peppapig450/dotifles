@@ -56,7 +56,8 @@
     "catgrid": "Show file using bat with grid style.",
     "catgit": "Show file using bat with changes (git) style.",
     "catd": "Show file using bat with default style.",
-    "catfull": "Show file using bat with full style."
+    "catfull": "Show file using bat with full style.",
+    "catn": "Show file using bat with numbers style."
   },
   "chezmoi.zsh": {
     "cz": "Run chezmoi (dotfiles manager) command.",
