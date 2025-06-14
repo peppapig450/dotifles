@@ -15,7 +15,8 @@
 [[ -o interactive ]] || return 0
 
 # Get the absolute path to this scripts directory
-script_dir="${${(%):-%x}:A:h}/alias-functions"
+script_dir="${(%):-%x}"
+script_dir="${script_dir:A:h}/alias-help"
 
 # Load shared helpers (shared variables and common functions)
 source "$script_dir/_helpers.zsh"
@@ -23,7 +24,7 @@ source "$script_dir/_helpers.zsh"
 # Add this directory to $fpath for autoload-based lazy loading
 fpath=("$script_dir" $fpath)
 
-for file in "$script_dir"/*.zsh(N); do
-    [[ "${file:t}" == "_helpers.zsh" ]] && continue
-    autoload -Uz "${file:t:r}"
+# Autoload all the helpers in the directory, excluding _helpers.zsh
+for file in "$script_dir"/[^_]*(.N); do
+    autoload -Uz "${file:t}"
 done
